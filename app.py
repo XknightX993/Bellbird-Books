@@ -9,39 +9,45 @@ def home():
     return render_template("index.html")
 
 
+# -----------------------------
+# Add New Stock
+# -----------------------------
 @app.route("/stock/add", methods=["GET", "POST"])
 def add_stock():
-    if request.method == "POST":
-        title = request.form["title"].strip()
-        author = request.form["author"].strip()
-        isbn = request.form["isbn"].strip()
-        quantity = request.form["quantity"]
-        cost = request.form["cost"]
-        price = request.form["price"]
-        location = request.form["location"].strip()
+    if request.method == "GET":
+        return render_template("add_stock.html")
 
-        if not title or not author or not location:
-            return "Title, Author and Location are required."
+    title = request.form["title"].strip()
+    author = request.form["author"].strip()
+    isbn = request.form["isbn"].strip()
+    quantity = request.form["quantity"]
+    cost = request.form["cost"]
+    price = request.form["price"]
+    location = request.form["location"].strip()
 
-        connection = get_connection()
+    if not title or not author or not location:
+        return "Title, Author and Location are required."
 
-        connection.execute(
-            """
-            INSERT INTO new_stock
-            (title, author, isbn, quantity, cost, price, location)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (title, author, isbn, quantity, cost, price, location),
-        )
+    connection = get_connection()
 
-        connection.commit()
-        connection.close()
+    connection.execute(
+        """
+        INSERT INTO new_stock
+        (title, author, isbn, quantity, cost, price, location)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (title, author, isbn, quantity, cost, price, location),
+    )
 
-        return "Stock added successfully."
+    connection.commit()
+    connection.close()
 
-    return render_template("add_stock.html")
+    return "Stock added successfully."
 
 
+# -----------------------------
+# Search Stock
+# -----------------------------
 @app.route("/stock/search")
 def search_stock():
     keyword = request.args.get("keyword", "").strip()
@@ -66,6 +72,9 @@ def search_stock():
     )
 
 
+# -----------------------------
+# Edit New Stock
+# -----------------------------
 @app.route("/stock/edit/<int:stock_id>", methods=["GET", "POST"])
 def edit_stock(stock_id):
     connection = get_connection()
@@ -127,6 +136,78 @@ def edit_stock(stock_id):
         return "Stock record not found."
 
     return render_template("edit_stock.html", stock=stock)
+
+
+# -----------------------------
+# Add Customer Order
+# -----------------------------
+@app.route("/orders/add", methods=["GET", "POST"])
+def add_order():
+    if request.method == "GET":
+        return render_template("add_order.html")
+
+    # Customer details
+    name = request.form["name"].strip()
+    phone = request.form["phone"].strip()
+    contact_preference = request.form["contact_preference"]
+
+    # Order details
+    title = request.form["title"].strip()
+    author = request.form["author"].strip()
+    quantity = request.form["quantity"]
+    deposit = request.form["deposit"]
+    order_date = request.form["order_date"]
+    arrival_date = request.form["arrival_date"]
+
+    # Required field validation
+    if not name or not phone or not title or not author or not order_date:
+        return "Customer name, phone, title, author and order date are required."
+
+    connection = get_connection()
+
+    # Add customer
+    connection.execute(
+        """
+        INSERT INTO customers
+        (name, phone, contact_preference)
+        VALUES (?, ?, ?)
+        """,
+        (name, phone, contact_preference),
+    )
+
+    # Get the new customer ID
+    customer_id = connection.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+    # Add order
+    connection.execute(
+        """
+        INSERT INTO orders
+        (
+            customer_id,
+            title,
+            author,
+            quantity,
+            deposit,
+            order_date,
+            arrival_date
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            customer_id,
+            title,
+            author,
+            quantity,
+            deposit,
+            order_date,
+            arrival_date,
+        ),
+    )
+
+    connection.commit()
+    connection.close()
+
+    return "Customer order created successfully."
 
 
 if __name__ == "__main__":
