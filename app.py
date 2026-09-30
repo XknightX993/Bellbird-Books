@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 from database.database import get_connection
 
 app = Flask(__name__)
@@ -11,35 +11,59 @@ def home():
 
 @app.route("/stock/add", methods=["GET", "POST"])
 def add_stock():
-    if request.method == "POST":
-        title = request.form["title"].strip()
-        author = request.form["author"].strip()
-        isbn = request.form["isbn"].strip()
-        quantity = request.form["quantity"]
-        cost = request.form["cost"]
-        price = request.form["price"]
-        location = request.form["location"].strip()
+    if request.method == "GET":
+        return render_template("add_stock.html")
 
-        if not title or not author or not location:
-            return "Title, Author and Location are required."
+    title = request.form["title"].strip()
+    author = request.form["author"].strip()
+    isbn = request.form["isbn"].strip()
+    quantity = request.form["quantity"]
+    cost = request.form["cost"]
+    price = request.form["price"]
+    location = request.form["location"].strip()
 
-        connection = get_connection()
+    if not title or not author or not location:
+        return "Title, Author and Location are required."
 
-        connection.execute(
-            """
-            INSERT INTO new_stock
-            (title, author, isbn, quantity, cost, price, location)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (title, author, isbn, quantity, cost, price, location),
-        )
+    connection = get_connection()
 
-        connection.commit()
-        connection.close()
+    connection.execute(
+        """
+        INSERT INTO new_stock
+        (title, author, isbn, quantity, cost, price, location)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (title, author, isbn, quantity, cost, price, location),
+    )
 
-        return "Stock added successfully."
+    connection.commit()
+    connection.close()
 
-    return render_template("add_stock.html")
+    return "Stock added successfully."
+
+
+@app.route("/stock/search")
+def search_stock():
+    keyword = request.args.get("keyword", "").strip()
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        """
+        SELECT title, author, quantity, cost, location
+        FROM new_stock
+        WHERE title LIKE ? OR author LIKE ?
+        """,
+        (f"%{keyword}%", f"%{keyword}%"),
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "search_stock.html",
+        stocks=rows,
+        keyword=keyword,
+    )
 
 
 if __name__ == "__main__":

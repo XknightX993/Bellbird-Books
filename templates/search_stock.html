@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Stock - Bellbird Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>Search Stock</h1>
+
+    <form method="GET" action="{{ url_for('search_stock') }}">
+        <label for="keyword">Search by title or author:</label>
+
+        <input type="text" id="keyword" name="keyword" value="{{ keyword }}" placeholder="Enter title or author">
+
+        <button type="submit">Search</button>
+    </form>
+
+    {% if keyword and not stocks %}
+    <p>No matching stock found.</p>
+    {% endif %}
+
+    {% if stocks %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Quantity</th>
+                <th>Cost</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock["title"] }}</td>
+                <td>{{ stock["author"] }}</td>
+                <td>{{ stock["quantity"] }}</td>
+                <td>{{ stock["cost"] }}</td>
+                <td>{{ stock["location"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <p>
+        <a href="{{ url_for('home') }}">Back to Home</a>
+    </p>
+
+</body>
+
+</html>
