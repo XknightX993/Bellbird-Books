@@ -32,3 +32,16 @@ CREATE TABLE IF NOT EXISTS orders (
     collected INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
+
+
+CREATE TABLE IF NOT EXISTS second_hand_stock (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    author TEXT NOT NULL,
+    condition TEXT NOT NULL,
+    source TEXT,
+    cost REAL,
+    price REAL,
+    location TEXT NOT NULL,
+    notes TEXT
+);

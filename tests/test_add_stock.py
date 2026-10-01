@@ -35,7 +35,7 @@ def test_add_new_stock(client):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 302
 
     connection = get_connection()
     row = connection.execute(
