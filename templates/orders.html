@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Customer Orders - Bellbird Books</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- =========================
+         Header
+    ========================== -->
+
+    <header>
+
+        <div class="container nav-bar">
+
+            <h1>Bellbird Books</h1>
+
+            <nav>
+
+                <a href="{{ url_for('home') }}">Home</a>
+
+                <a href="{{ url_for('search_stock') }}">
+                    Stock
+                </a>
+
+                <a href="{{ url_for('add_stock') }}">
+                    Add Stock
+                </a>
+
+                <a href="{{ url_for('add_order') }}">
+                    New Order
+                </a>
+
+                <a href="{{ url_for('view_orders') }}">
+                    Orders
+                </a>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         Main Content
+    ========================== -->
+
+    <main class="container">
+
+        <!-- Page Header -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h2>Customer Orders</h2>
+
+                <p>
+                    View and manage customer book orders.
+                </p>
+
+            </div>
+
+
+            <a class="btn primary" href="{{ url_for('add_order') }}">
+                + New Order
+            </a>
+
+        </div>
+
+
+        <!-- =========================
+             Search and Filter
+        ========================== -->
+
+        <form method="GET" action="{{ url_for('view_orders') }}" class="search-form">
+
+            <input type="text" name="keyword" placeholder="Search customer or book title" value="{{ keyword or '' }}">
+
+
+            <select name="status">
+
+                <option value="">
+                    All Status
+                </option>
+
+
+                <option value="Ordered" {% if status_filter=="Ordered" %} selected {% endif %}>
+                    Ordered
+                </option>
+
+
+                <option value="Arrived" {% if status_filter=="Arrived" %} selected {% endif %}>
+                    Arrived
+                </option>
+
+
+                <option value="Notified" {% if status_filter=="Notified" %} selected {% endif %}>
+                    Notified
+                </option>
+
+
+                <option value="Collected" {% if status_filter=="Collected" %} selected {% endif %}>
+                    Collected
+                </option>
+
+
+                <option value="Cancelled" {% if status_filter=="Cancelled" %} selected {% endif %}>
+                    Cancelled
+                </option>
+
+            </select>
+
+
+            <button type="submit" class="btn primary">
+                Search
+            </button>
+
+
+            <a href="{{ url_for('view_orders') }}" class="btn secondary">
+                Clear
+            </a>
+
+        </form>
+
+
+        <!-- =========================
+             Orders Table
+        ========================== -->
+
+        {% if orders %}
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Order ID</th>
+
+                        <th>Customer</th>
+
+                        <th>Phone</th>
+
+                        <th>Contact</th>
+
+                        <th>Book</th>
+
+                        <th>Author</th>
+
+                        <th>Qty</th>
+
+                        <th>Deposit</th>
+
+                        <th>Order Date</th>
+
+                        <th>Arrival Date</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for order in orders %}
+
+                    <tr>
+
+                        <!-- Order ID -->
+
+                        <td>
+                            {{ order["id"] }}
+                        </td>
+
+
+                        <!-- Customer -->
+
+                        <td>
+                            {{ order["name"] }}
+                        </td>
+
+
+                        <!-- Phone -->
+
+                        <td>
+                            {{ order["phone"] }}
+                        </td>
+
+
+                        <!-- Contact Preference -->
+
+                        <td>
+                            {{ order["contact_preference"] }}
+                        </td>
+
+
+                        <!-- Book -->
+
+                        <td>
+                            {{ order["title"] }}
+                        </td>
+
+
+                        <!-- Author -->
+
+                        <td>
+                            {{ order["author"] }}
+                        </td>
+
+
+                        <!-- Quantity -->
+
+                        <td>
+                            {{ order["quantity"] }}
+                        </td>
+
+
+                        <!-- Deposit -->
+
+                        <td>
+                            ${{ "%.2f"|format(order["deposit"] or 0) }}
+                        </td>
+
+
+                        <!-- Order Date -->
+
+                        <td>
+                            {{ order["order_date"] }}
+                        </td>
+
+
+                        <!-- Arrival Date -->
+
+                        <td>
+
+                            {% if order["arrival_date"] %}
+
+                            {{ order["arrival_date"] }}
+
+                            {% else %}
+
+                            -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Current Status -->
+
+                        <td>
+
+                            <span class="status">
+
+                                {{ order["status"] }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- Update Status -->
+
+                        <td>
+
+                            <form action="{{ url_for('update_order_status', order_id=order['id']) }}" method="POST"
+                                class="inline-form">
+
+                                <select name="status">
+
+                                    <option value="Ordered" {% if order["status"]=="Ordered" %} selected {% endif %}>
+                                        Ordered
+                                    </option>
+
+
+                                    <option value="Arrived" {% if order["status"]=="Arrived" %} selected {% endif %}>
+                                        Arrived
+                                    </option>
+
+
+                                    <option value="Notified" {% if order["status"]=="Notified" %} selected {% endif %}>
+                                        Notified
+                                    </option>
+
+
+                                    <option value="Collected" {% if order["status"]=="Collected" %} selected {% endif
+                                        %}>
+                                        Collected
+                                    </option>
+
+
+                                    <option value="Cancelled" {% if order["status"]=="Cancelled" %} selected {% endif
+                                        %}>
+                                        Cancelled
+                                    </option>
+
+                                </select>
+
+
+                                <button type="submit" class="btn small">
+                                    Update
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =========================
+             No Orders
+        ========================== -->
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <h3>
+                No customer orders
+            </h3>
+
+
+            <p>
+                No orders match your search or filter.
+            </p>
+
+
+            <a class="btn primary" href="{{ url_for('add_order') }}">
+                Create First Order
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </main>
+
+
+    <!-- =========================
+         Footer
+    ========================== -->
+
+    <footer>
+
+        <div class="container">
+
+            <p>
+                Bellbird Books Management System
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+
+</html>

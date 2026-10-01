@@ -43,8 +43,8 @@ def test_create_customer_order(client):
         },
     )
 
-    assert response.status_code == 200
-    assert b"Customer order created successfully." in response.data
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/orders")
 
     connection = get_connection()
 

@@ -78,8 +78,8 @@ def test_update_order_status(client):
         },
     )
 
-    assert response.status_code == 200
-    assert b"Order status updated successfully." in response.data
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/orders")
 
     # Check the database
     connection = get_connection()
